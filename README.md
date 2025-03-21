@@ -14,6 +14,7 @@ The project is based on a milestone structure with the following milestones curr
 The software and design development will continue in parallel on Github.
 
 | Milestone | Type | Status |
+|-----------|------|--------|
 | Proof of principle | Development  | Completed in 2021  |
 | Proof of concept | Development | Completed in 2024 |
 | Publish on Github | Development | Completed Q1 2025 |
