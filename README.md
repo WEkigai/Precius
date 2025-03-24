@@ -19,11 +19,11 @@ The guiding principles of the project are:
 
 ## Plan
 ### Completed
-* Proof of concept using Aurdino and ESP32. [See here](https://github.com/WEkigai/Precius_PreDevelopment/tree/main).
+* Proof of concept using Aurdino and ESP32. [See here](https://github.com/WEkigai/Precius_PreDevelopment/tree/main)
 * First PCB design for proto. [See here](Electronics_Design)
-* Industrial design for the product.
+* Industrial design for the product.[See here](Industrial_Design)
 * Mechanical design for the prototype.[See here](Mechanical_Design/CAD)
-* Create rendered images (using Blender). [See here](/Assets/Renders).
+* Create rendered images (using Blender). [See here](/Assets/Renders)
 * Idenfity a suitable manufacturing partner. Done.
 * Establish business and logistics support structure. Done, WEkigai has been in business since 2018 with established logistics network.
 
