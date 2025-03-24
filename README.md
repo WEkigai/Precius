@@ -81,7 +81,7 @@ Coming soon!
 * Mainly because we believe it is the right thing to do. Cooking food is fundamental to our human nature and we believe improvements in cooking methods should not stay behind patents or lock-ins.
 * We also believe that the purpose we want to achieve is beyond a single product, company or us as individual. It is a collective vision that can be realized to its fullest only by our collective efforts.
 * We are not the silicon valley type. We are a small employee owned company with no external investors or shareholders (by choice!). We will remain employee owned and user driven rather than being driven by short term profit and *maximizing shareholder value*.
-* We got a lot from Open Source and this is our way to say thank you.
+* We got a lot from Open Source and this is our way to say thank you. For example, all the rendered images on this page were made with Blender, an open source tool.
 
 ## Our Business Model
 We aim to generate revenue selling hardware based on this project and additional accessories (e.g. cookware, kitchen tools). In the future we may offer *optional* services (e.g. online downlaodable recipes) to generate further revenue. One of our inspirations is [Nabu Casa](https://www.nabucasa.com/), the company behind [HomeAssistant](https://www.home-assistant.io/).
@@ -89,10 +89,11 @@ We aim to generate revenue selling hardware based on this project and additional
 ## Contributing
 We would be lying if we say we can do this without your help. Yes, you in particular! We know a lot about making products and running a business. But we do not know everything and do not have the resources to do everything on our own. 
 No matter who you are, we are sure you can help us get further together. Some of the things you can help with:
-* Think along with us (food, science, engineering, usability.....)
-* Share your ideas
-* Contribute to software development
-* Contribute to mechanical and electronics design
+* First, please [signup on our mailing list](https://wekigai.eu/precius)
+* Think along with us (food, science, engineering, usability.....). You can use the [Discussions section](https://github.com/WEkigai/Precius/discussions)
+* Share your ideas use [issues](https://github.com/WEkigai/Precius/issues) or just shoot an email to info@wekigai.eu.
+* Contribute to software development through pull requests
+* Contribute to mechanical and electronics design through pull requests or through email info@wekigai.eu
 * Help us spread this story via blogs, social media posts or email
 * Copywriting
 * Recipe ideas and testing
@@ -100,6 +101,16 @@ No matter who you are, we are sure you can help us get further together. Some of
 * 3D modelling (Blender and FreeCAD)
 * ...
 Have other ideas to help? Just [get in touch](https://wekigai.eu/contact).
+
+## The next big step
+The next big step for the project is to start manufacturing of the Precius Station. Creating and selling the hardware is the only way for us to sustain as a business, earn our livelihoods and continue open source development of this project.
+We expect following costs before/during the manufacturing stage.
+* Tooling cost: estimated 30,000 USD These are the tools needed to form the metal body, custom heater, and injection molded plastic parts
+* Certification cost : estimated at 20,000 USD for relevant certifications in EU, USA and UK
+* First order capital : estimated at 50,000 USD to meet the minimum order quantity requirements of the manufacturer
+
+This is before counting all the design and development effort. While we will do our best to bring these costs down, they will never be low enough to fit within the risk capacity of a small comapny like ours. So, we believe the next big step for us is to crowdfund Precius Station and generate revenue to cover a significant portion of these costs.
+We do count on your support to make that happen. Please [signup on our mailing list](https://wekigai.eu/precius) to stay tuned and support us.
 
 ## About WEkigai
 **WEkigai** is a small company based in the Netherlands. The company is run by an engineer-scientist combo who apply their knowledge to make cooking easier and better. The company makes niche products at the intersection of food, science and engineering in the context of home cooking [More](https://wekigai.eu/about). The company was formed with the first product [LoafNest](https://wekigai.eu/loafnest) which was commercialized through a [Kickstarter campaign](https://www.kickstarter.com/projects/trfl/loafnest/) in 2018.
