@@ -89,3 +89,4 @@ Additional protections may apply for copyrights and trademarks from respective o
 This is not a legal advise, please see license texts for legally binding license. In general, all information on this project can be modified or improved **for personal use**. If you wish to distribute this work or its derivatives (**either non-commercially or commercially**) you are obliged to disclose those modifications and where applicable, provide attribution. For commercial use, you may be additionally restricted by trademarks. In any case, no warranty or liability claims can be made against this project.
 
 ## Development Progress
+We will share our development progress on the [announcement page here](discussions/categories/announcements). Please check out the latest post to know the status.
