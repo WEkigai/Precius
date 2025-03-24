@@ -23,7 +23,7 @@ The guiding principles of the project are:
 * First PCB design.
 * Industrial design for the product.
 * Mechanical design for the prototype.
-* Create rendered images (using Blender). See here.
+* Create rendered images (using Blender). [See here](/Assets/Renders).
 * Idenfity a suitable manufacturing partner. Done.
 * Establish business and logistics support structure. Done, WEkigai has been in business since 2018 with established logistics network.
 
