@@ -1,5 +1,7 @@
 # Precius: Precision Cooking and Home Kitchen Automation
+
 This page is designed for a technically oriented audience. For a consumer-friendly version, please [click here](https://wekigai.eu/precius).
+
 Precius is an Open Source Hardware and Software project designed for **Precision Cooking and Kitchen Automation for home cooks**. The project is funded and managed by [WEkigai](https://wekigai.eu). The first product in the series is [Precius Station](https://wekigai.eu/precius), a commercially available precision cooktop.
 
 ## What is Precision Cooking and why is it important
