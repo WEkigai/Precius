@@ -2,6 +2,9 @@
 
 This page is designed for a technically oriented audience. For a consumer-friendly version, please [click here](https://wekigai.eu/precius).
 
+![1](https://github.com/user-attachments/assets/bd53d176-7a6f-4054-ad91-c414be2eb5b5)
+
+
 Precius is an Open Source Hardware and Software project designed for **Precision Cooking and Kitchen Automation for home cooks**. The project is funded and managed by [WEkigai](https://wekigai.eu). The first product in the series is [Precius Station](https://wekigai.eu/precius), a commercially available precision cooktop.
 
 ## What is Precision Cooking and why is it important
@@ -33,6 +36,20 @@ The software and design development will continue in parallel on Github.
 
 ## How does Precius Station Work
 Coming soon!
+
+## Precius Station Main Features
+### Dual Temperature Sensors: Direct Pan temperature sensor and probe sensor for liquids/food
+![6](https://github.com/user-attachments/assets/356a641d-0c6c-4a88-9c0d-1820eb42620d)
+
+### Physical buttons for control, LCD screen, Auxillary power port
+![5](https://github.com/user-attachments/assets/6c013163-0d03-4cf7-a1ba-95451b089742)
+
+### USB port for serial communication and flashing custom firmware
+![4](https://github.com/user-attachments/assets/93a9f02b-2223-4727-8fe8-8bc4c1361f23)
+
+### Powerful 1500 W heating plate
+![3](https://github.com/user-attachments/assets/00940fcb-da00-4d83-b6b6-ffc617b3ddf6)
+
 
 ## Hardware Specifications Precius Station (alpha version)
 * Heater : resistive type with aluminum body
