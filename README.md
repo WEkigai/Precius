@@ -17,22 +17,33 @@ The guiding principles of the project are:
 - **Unrestricted** : Commercially sold hardware shall be unencumbered with lock-ins, subscriptions or other financial or usability restrictions within the limits of product safety and liability.
 - **Extendable, Repairable and Upgradable**: Within the constraints of design and supply chain, the products will maximize the ability for the user to extend, repair or upgrade their products.
 
-## Roadmap
+## Plan
+### Completed
+* Proof of concept using Aurdino and ESP32. [See here](https://github.com/WEkigai/Precius_PreDevelopment/tree/main).
+* First PCB design.
+* Industrial design for the product.
+* Mechanical design for the prototype.
+* Create rendered images (using Blender). See here.
+* Idenfity a suitable manufacturing partner. Done.
+* Establish business and logistics support structure. Done, WEkigai has been in business since 2018 with established logistics network.
 
-The project is based on a milestone structure with the following milestones currently defined.
-The software and design development will continue in parallel on Github.
+### In progress
+* Manufacture of first samples of the product (Prototypes)
+* Creation and testing of PCB version 2, including all functionality except AC power.
+* Create project pages, website, mailing list
+* First version of code with UI and Menu using actual hardware
 
-| Milestone | Type | Status |
-|-----------|------|--------|
-| Proof of principle | Development  | Completed in 2021  |
-| Proof of concept | Development | Completed in 2024 |
-| Publish on Github | Development | Completed Q1 2025 |
-| First pre-commercial prototype | Development | Planned Q2 2025 |
-| Setup signup list | Commercial | Planned Q1 2025 |
-| Pre-manufacturing fundraising | Commercial | Planned Q2/Q3 2025 |
-| Certification - alpha | Commercial |Planned Q4 2025 |
-| Manufacturing - alpha | Commercial |Planned Q4 2025 |
-| Alpha delivered| Commercial |Planned Q1 2026 |
+### Future tasks
+* Create mass manufacturing mechanical design for production processes like molding.
+* Create mass manufacturing PCB design and test (including AC/power components)
+* Create crowdfunding campaign for the tooling costs and first order minimum quantities
+* Place order for tooling and first manufacturing run
+* Sample production and testing
+* Certification
+* Fulfill crowdfunding orders
+* Make product available for retail purchase
+* Continue improving software and work on hardware improvements
+* Work on accessories and extensions (sous-vide, proofing cabinet, dehydrator...)
 
 ## How does Precius Station Work
 Coming soon!
