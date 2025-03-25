@@ -121,7 +121,7 @@ We expect following costs before/during the manufacturing stage.
 * First order capital : estimated at 50,000 USD to meet the minimum order quantity requirements of the manufacturer
 
 This is before counting all the design and development effort. While we will do our best to bring these costs down, they will never be low enough to fit within the risk capacity of a small company like ours. So, we believe the next big step for us is to crowdfund Precius Station and generate revenue to cover a significant portion of these costs.
-We do count on your support to make that happen. Please [signup on our mailing list](https://wekigai.eu/precius) to stay tuned and support us.
+We do count on your support to make that happen. Please [signup on our mailing list](https://wekigai.eu/precius#signup) to stay tuned and support us.
 
 ## About WEkigai
 **WEkigai** is a small company based in the Netherlands. The company is run by an engineer-scientist combo who apply their knowledge to make cooking easier and better. The company makes niche products at the intersection of food, science and engineering in the context of home cooking [More](https://wekigai.eu/about). The company was formed with the first product [LoafNest](https://wekigai.eu/loafnest) which was commercialized through a [Kickstarter campaign](https://www.kickstarter.com/projects/trfl/loafnest/) in 2018.
