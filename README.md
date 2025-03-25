@@ -73,7 +73,8 @@ The maximum power we could pull from a 110 V US wall socket. *Theoretical* time 
 
 
 ## Hardware Specifications Precius Station (alpha version)
-* **Heater** : resistive type with aluminum body. Compatiable with all metallic cookware including copper, aluminum, stainless steel, cast iron, carbon steel and multi-layer cookware.
+* **Body** Poweder coated steel. Corrossion resistent. Front and back covers high temperature plastic.
+* **Heater** : resistive type with aluminum alloy body. Compatiable with all metallic cookware including copper, aluminum, stainless steel, cast iron, carbon steel and multi-layer cookware.
 * **Heating power** : 1500 W
 * **Sensors**:
   - Spring loaded pan bottom sensor. 100 k NTC type
