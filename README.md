@@ -9,7 +9,7 @@ Precius is an Open Source Hardware and Software project designed for **Precision
 
 ## What is Precision Cooking and why is it important
 Cooking is a physical and chemical change we impart on food to make it tastier, more nutritious or convenient. As with many chemical reactions, the way the food cooks depends on its temperature and time. Traditional cooking methods like stovetops can not control the temperature of the food directly, but rely on the user to control the power. This is error prone, inconsistent and makes hard to learn cooking.
-Precision cooking is a way to cook food by controlling the temperature and time instead of power of the heat source. Sous vide is possibly the well known way to do it, but the same principle can be used for a much wider variety of cooking methods like deep frying, pan frying, sauteeing, searing just to name a few.
+Precision cooking is a way to cook food by controlling the temperature and time instead of power of the heat source. Sous vide is possibly the well known way to do it, but the same principle can be used for a much wider variety of cooking methods like deep frying, pan frying, sauteeing, searing, air roasting, just to name a few.
 With precision cooking, the recipes are easier to cook with, consistent across kithens and climates.
 
 ## Vision and Guiding Principles
@@ -47,8 +47,13 @@ The guiding principles of the project are:
 * Continue improving software and work on hardware improvements
 * Work on accessories and extensions (sous-vide, proofing cabinet, dehydrator...)
 
+### Development Progress
+We will share our development progress on the [announcement page here](https://github.com/WEkigai/Precius/discussions/categories/announcements). Please check out the latest post to know the status.
+
 ## How does Precius Station Work
-Coming soon!
+Precius Station works primarily as a control loop connecting the temperature sensor(s) and the heater output. The center of the heater has a temperature sensor that directly measures the temperature of the cookware. The additional probe sensor can be used to measure temperature of the food (e.g. steak) or liquids like water, oil or other mixtures.
+The user selects one of the modes to set a target temperature (and optional time). The control unit (in this case based on ESP32 hardware) processes the input temperatures, uses a control algorithm (currently a [PID controller](https://en.wikipedia.org/wiki/Proportional%E2%80%93integral%E2%80%93derivative_controller)) to adjust the power of the heater to ensure that the target temperature is reached as soon as possible without overshooting. The controller then keeps the temperature at the target for the desired duration (or indefinitely).
+You can find more details on the hardware specifications as well as design details for hardware and software.
 
 ## Precius Station Main Features
 ### Dual Temperature Sensors: Direct Pan temperature sensor and probe sensor for liquids/food
@@ -65,19 +70,19 @@ Coming soon!
 
 
 ## Hardware Specifications Precius Station (alpha version)
-* Heater : resistive type with aluminum body
-* Heating power : 1500 W
-* Sensors:
+* **Heater** : resistive type with aluminum body. Compatiable with all metallic cookware including copper, aluminum, stainless steel, cast iron, carbon steel and multi-layer cookware.
+* **Heating power** : 1500 W
+* **Sensors**:
   - Spring loaded pan bottom sensor. 100 k NTC type
   - Probe sensor with 3.5mm jack connection. 100 k NTC type
-* Controller: ESP32 S3 module with custom PCB and buttons
-* 2.8 inch 320x240 color LCD display
-* Connectivity:
+* **Controller**: ESP32 S3 module with custom PCB and buttons
+* **Display**: 2.8 inch 320x240 color LCD display
+* **Connectivity**:
   - USB
   - WiFi
   - Other widely supported short range wireless protocol which we are not allowed to mention by name without paying licensing fees.
-* Input Power: 230 V AC (EU/UK version) or 110 V AC (US version)
-* Auxiliary power out : 9 V, max 5 A. 5.5mm Audio Jack connection.
+* **Input Voltage**: 230 V AC (EU/UK version) or 110 V AC (US version)
+* **Auxiliary power out** : 9 V, max 5 A. 5.5mm Audio Jack connection.
 
 ## Why Open Source?
 * Mainly because we believe it is the right thing to do. Cooking food is fundamental to our human nature and we believe improvements in cooking methods should not stay behind patents or lock-ins.
@@ -87,9 +92,10 @@ Coming soon!
 
 ## Our Business Model
 We aim to generate revenue selling hardware based on this project and additional accessories (e.g. cookware, kitchen tools). In the future we may offer *optional* services (e.g. online downloadable recipes) to generate further revenue. One of our inspirations is [Nabu Casa](https://www.nabucasa.com/), the company behind [HomeAssistant](https://www.home-assistant.io/).
+You can support us by purchasing our existing products if they meet your kitchen needs. Go to [our website](https://wekigai.eu).
 
 ## Contributing
-We would be lying if we say we can do this without your help. Yes, you in particular! We know a lot about making products and running a business. But we do not know everything and do not have the resources to do everything on our own. 
+We would be lying if we say we can do this without your help. **Yes, you in particular!** We know a lot about making products and running a business. But we do not know everything and do not have the resources to do everything on our own. 
 No matter who you are, we are sure you can help us get further together. Some of the things you can help with:
 * First, please [signup on our mailing list](https://wekigai.eu/precius)
 * Think along with us (food, science, engineering, usability.....). You can use the [Discussions section](https://github.com/WEkigai/Precius/discussions)
@@ -129,5 +135,3 @@ Additional protections may apply for copyrights and trademarks from respective o
 ### Licensing, in simple terms
 This is not a legal advice, please see license texts for legally binding license. In general, all information on this project can be modified or improved **for personal use**. If you wish to distribute this work or its derivatives (**either non-commercially or commercially**) you are obliged to disclose those modifications and where applicable, provide attribution. For commercial use, you may be additionally restricted by trademarks. In any case, no warranty or liability claims can be made against this project.
 
-## Development Progress
-We will share our development progress on the [announcement page here](https://github.com/WEkigai/Precius/discussions/categories/announcements). Please check out the latest post to know the status.
