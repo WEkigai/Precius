@@ -73,8 +73,10 @@ The maximum power we could pull from a 110 V US wall socket. *Theoretical* time 
 
 
 ## Hardware Specifications Precius Station (alpha version)
+* **Size** : 30 x 25 x 10 cm or 12 x 10 x 4 inches. Exact dimensions to be finalized before productization.
+* **Weight** : Approx 2kg or 4.5 lbs
 * **Body** Poweder coated steel. Corrossion resistent. Front and back covers high temperature plastic.
-* **Heater** : resistive type with aluminum alloy body. Compatiable with all metallic cookware including copper, aluminum, stainless steel, cast iron, carbon steel and multi-layer cookware.
+* **Heater** : 20 cm / 8 inch diamter resistive heter with aluminum alloy body. Compatiable with all metallic cookware including copper, aluminum, stainless steel, cast iron, carbon steel and multi-layer cookware.
 * **Heating power** : 1500 W
 * **Sensors**:
   - Spring loaded pan bottom sensor. 100 k NTC type
