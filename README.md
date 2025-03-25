@@ -58,15 +58,18 @@ You can find more details on the hardware specifications as well as design detai
 ## Precius Station Main Features
 ### Dual Temperature Sensors: Direct Pan temperature sensor and probe sensor for liquids/food
 ![6](https://github.com/user-attachments/assets/356a641d-0c6c-4a88-9c0d-1820eb42620d)
-
+Bottom temperature sensor measures the pan temperature directly. Removable probe sensor for measuring food temperature (e.g. steak) or liquid temperature (water, milk, oils)
 ### Physical buttons for control, LCD screen, Auxiliary power port
 ![5](https://github.com/user-attachments/assets/6c013163-0d03-4cf7-a1ba-95451b089742)
+No greasy touch screens. Easy navigation with 5-way navigation buttons and rotary knob (with press).
 
 ### USB port for serial communication and flashing custom firmware
 ![4](https://github.com/user-attachments/assets/93a9f02b-2223-4727-8fe8-8bc4c1361f23)
+Side load your own firmware, monitor everything on Serial. Works with Arduino IDE.
 
 ### Powerful 1500 W heating plate
 ![3](https://github.com/user-attachments/assets/00940fcb-da00-4d83-b6b6-ffc617b3ddf6)
+The maximum power we could pull from a 110 V US wall socket. *Theoretical* time to heat 2 kg of water from room temperature (20 C) to boiling (100 C) = 8 minutes.
 
 
 ## Hardware Specifications Precius Station (alpha version)
@@ -82,7 +85,7 @@ You can find more details on the hardware specifications as well as design detai
   - WiFi
   - Other widely supported short range wireless protocol which we are not allowed to mention by name without paying licensing fees.
 * **Input Voltage**: 230 V AC (EU/UK version) or 110 V AC (US version)
-* **Auxiliary power out** : 9 V, max 5 A. 5.5mm Audio Jack connection.
+* **Auxiliary power out** : 9 V, max 5 A. 5.5mm Audio Jack connection. Intended to power future accessories like sous-vide water circulator, dehydrator fan, stirring attachment etc.
 
 ## Why Open Source?
 * Mainly because we believe it is the right thing to do. Cooking food is fundamental to our human nature and we believe improvements in cooking methods should not stay behind patents or lock-ins.
