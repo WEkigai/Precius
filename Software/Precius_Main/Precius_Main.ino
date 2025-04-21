@@ -194,6 +194,7 @@ void do_heater();        // Function to handle heater
 void do_statemachine();  // Handles all states; sets variables to right value depending on state
 void do_timer();         //Handles the timer countdown
 void do_control();       // Handles the control algorithm
+int smoothAnalog(int reading); //Smooth reading of analog inputs
 
 void up_button_click(Button2& btn);
 void down_button_click(Button2& btn);
@@ -365,7 +366,8 @@ void do_readTemp()
 
 // Read temperature of base
 
-Vout_base=float(analogReadMilliVolts(BASE_SENSOR_PIN))/1000.0;
+//Vout_base=float(analogReadMilliVolts(BASE_SENSOR_PIN))/1000.0;
+Vout_base=float(smoothAnalog(analogReadMilliVolts(BASE_SENSOR_PIN)))/1000.0;
 Rout_base=R_ref_base*(Vref/Vout_base - 1.0);
 TempK_base=1.0/(((log(Rout_base/R_0_base))/beta_base)+(1/(T_0_base)));
 
@@ -638,4 +640,24 @@ if(screen==TIME_SETING_SCREEN){
   screen=HOME_SCREEN;
   return;
   }  
+}
+
+int smoothAnalog(int reading) 
+{
+  const int numSamples = 20;
+  static int samples[numSamples];
+  static int sampleIndex = 0;
+  static int sampleSum = 0;
+
+  // NOTE: It will take 20 measurements to fill the sample
+  // array and return a true smoothed value. 
+  
+  // Update sum
+  sampleSum -= samples[sampleIndex];
+  samples[sampleIndex] = reading;
+  sampleSum += samples[sampleIndex++];
+  sampleIndex = sampleIndex % numSamples;
+
+  // Return average of last numSamples measurements
+  return sampleSum/numSamples;
 }
