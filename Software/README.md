@@ -1,3 +1,3 @@
-Software code coming soon!
+Software still being built. You can see the code in current state.
 
-For now, you can checkout the proof of concept versions [here.](https://github.com/WEkigai/Precius_PreDevelopment)
+You can checkout the proof of concept versions [here.](https://github.com/WEkigai/Precius_PreDevelopment)
