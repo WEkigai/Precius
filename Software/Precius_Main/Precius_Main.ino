@@ -308,7 +308,7 @@ void loop()
 if (encoderValue != lastEncoderValue) {
     switch (screen){
       case HOME_SCREEN: {
-        Tset += (encoderValue-lastEncoderValue);
+        Tset = Tset+ (encoderValue-lastEncoderValue)*0.5;
         if(Tset<10)Tset=10;
         if(tempUnit==UNIT_C && Tset>260)Tset=260;
         if(tempUnit==UNIT_F && Tset>550)Tset=500;
