@@ -487,7 +487,7 @@ canvas.setCursor(13, 117);
 canvas.printf("%d",int(powerPercent)); // Text for power percent
 
 // Show target temperature icon and value
-canvas.drawBitmap(240, 144, target_icon, 15, 16, 0xFFFF);
+canvas.drawBitmap(185, 110, target_icon, 15, 16, 0xFFFF);
 canvas.setFont(&FreeSansBold12pt7b);
 canvas.setTextSize(2);
 canvas.setCursor(195, 130);
