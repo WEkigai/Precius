@@ -47,7 +47,7 @@ Button2 button_up(BUTTON_UP_PIN, true);
 Button2 button_enc(BUTTON_ENC_PIN,true);
 
 // Encoder variables
-volatile int encoderValue = 0;
+volatile int encoderValue = -998;
 volatile int lastStateA = 0;
 int lastEncoderValue = -999;
 
@@ -390,16 +390,27 @@ Vout_base=float(smoothAnalog(analogReadMilliVolts(BASE_SENSOR_PIN)))/1000.0;
 Rout_base=R_ref_base*(Vref/Vout_base - 1.0);
 TempK_base=1.0/(((log(Rout_base/R_0_base))/beta_base)+(1/(T_0_base)));
 
+if((TempK_base<=100 || TempK_base>500)&&(sensorMode==BOTTOM_SENSOR_ONLY || sensorMode==DUAL_MODE)){
+  TempK_base=273.15; //If reading is out of range, return 0 C
+  heaterState=HEATER_OFF; //Turn off heater to prevent thermal runout
+}
+
 if(tempUnit==UNIT_C)T_base=TempK_base-273.15;
 if(tempUnit==UNIT_F)T_base=((TempK_base-273.15)*5.0/9.0)-32.0;
 
-Serial.println(Rout_base);
+//Serial.println(Rout_base);
 
 // Read temperature of probe
 
 Vout_probe=float(analogReadMilliVolts(PROBE_SENSOR_PIN))/1000.0;
 Rout_probe=R_ref_probe*(Vref/Vout_probe - 1.0);
 TempK_probe=1.0/(((log(Rout_probe/R_0_probe))/beta_probe)+(1/(T_0_probe)));
+
+if((TempK_probe<=100 || TempK_probe>500)&& (sensorMode==PROBE_SENSOR_ONLY || sensorMode==DUAL_MODE)){
+  TempK_probe=273.15; //If reading is out of range, return 0 C
+  heaterState=HEATER_OFF; //Turn off heater to prevent thermal runout
+}
+//Serial.println(TempK_probe);
 
 if(tempUnit==UNIT_C)T_probe=TempK_probe-273.15;
 if(tempUnit==UNIT_F)T_probe=((TempK_probe-273.15)*5.0/9.0)-32.0;
