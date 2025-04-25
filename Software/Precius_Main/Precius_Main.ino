@@ -79,6 +79,17 @@ int lastEncoderValue = -999;
 
 // Create the ST7789 TFT object using hardware SPI:
 Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
+GFXcanvas16 canvas(320, 240); //Canvas object for rendering display off-screen
+
+// Icons and fonts
+#include <Fonts/FreeSansBold18pt7b.h>
+#include <Fonts/FreeSansBold12pt7b.h>
+#include <Fonts/FreeSerifBold18pt7b.h>
+#include <Fonts/FreeSerifBold12pt7b.h>
+static const unsigned char PROGMEM intensity_icon[] = {0x00,0x00,0x00,0x00,0x00,0x40,0x00,0xc0,0x01,0x80,0x03,0x80,0x07,0x00,0x0f,0xe0,0x01,0xc0,0x03,0x80,0x03,0x00,0x06,0x00,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+static const unsigned char PROGMEM probe_sensor_icon[] = {0x00,0x08,0x00,0x14,0x00,0x22,0x00,0x51,0x00,0x8a,0x01,0x04,0x02,0x08,0x04,0x10,0x08,0x20,0x10,0x40,0x20,0x80,0x41,0x00,0x82,0x00,0x84,0x00,0x88,0x00,0xf0,0x00};
+static const unsigned char PROGMEM target_icon[] = {0x01,0x00,0x03,0x80,0x0d,0x60,0x11,0x10,0x20,0x08,0x20,0x08,0x41,0x04,0xf2,0x9e,0x41,0x04,0x20,0x08,0x20,0x08,0x11,0x10,0x0d,0x60,0x03,0x80,0x01,0x00,0x00,0x00};
+static const unsigned char PROGMEM pan_sensor_icon[] = {0x00,0x00,0x01,0x00,0x01,0x00,0x01,0x00,0x01,0x00,0x01,0x00,0x09,0x20,0x07,0xc0,0xe3,0x8e,0xa1,0x0a,0xbf,0xfa,0x80,0x02,0x80,0x02,0xff,0xfe,0x00,0x00,0x00,0x00};
 
 
 // Temperature variables
@@ -182,7 +193,7 @@ float TempK_probe = 0.0;  // variable output
 
 
 //Parameters to refresh display
-unsigned int display_refresh_period = 1000;  //milliseconds between display updates
+unsigned int display_refresh_period = 500;  //milliseconds between display updates
 unsigned long display_refresh_StartTime;    //start time of each refresh cycle
 static boolean flag_display_refresh = true;  //display refresh flag
 
@@ -197,7 +208,9 @@ void do_control();       // Handles the control algorithm
 int smoothAnalog(int reading); //Smooth reading of analog inputs
 
 void up_button_click(Button2& btn);
+void up_button_longclick(Button2& btn);
 void down_button_click(Button2& btn);
+void down_button_longclick(Button2& btn);
 void left_button_click(Button2& btn);
 void right_button_click(Button2& btn);
 void mid_button_click(Button2& btn);
@@ -230,7 +243,13 @@ button_mid.begin(BUTTON_MID_PIN,INPUT_PULLUP,true);
 button_enc.begin(BUTTON_ENC_PIN,INPUT_PULLUP,true);
 
 button_up.setClickHandler(up_button_click);
+button_up.setLongClickDetectedHandler(up_button_longclick);
+button_up.setLongClickDetectedRetriggerable(true);
+
 button_down.setClickHandler(down_button_click);
+button_down.setLongClickDetectedHandler(down_button_longclick);
+button_down.setLongClickDetectedRetriggerable(true);
+
 button_left.setClickHandler(left_button_click);
 button_right.setClickHandler(right_button_click);
 button_mid.setClickHandler(mid_button_click);
@@ -257,8 +276,8 @@ button_enc.setClickHandler(enc_button_click);
   pinMode(TFT_BL, OUTPUT);
   digitalWrite(TFT_BL, HIGH);
 
-  tft.setCursor(40, 128);
-  tft.print("WELCOME");
+  tft.setCursor(80, 100);
+  tft.print("Precius");
   delay(2000);
   tft.fillScreen(ST77XX_BLACK);
 
@@ -436,79 +455,93 @@ void do_control(){
 void do_display() {
 //if it is time to update display update it and set the refresh flag back to false
   if (flag_display_refresh) {
+    //We draw everything on to a canvas and at the end push to display
 
 if(screen==HOME_SCREEN){
 // Clear display
-//tft.fillScreen(ST77XX_BLACK);
-tft.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-tft.setTextSize(2);
+canvas.fillScreen(ST77XX_BLACK);
+//tft.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+//tft.setTextSize(2);
 
-// Display Mode
-tft.setCursor(10, 10);
-tft.print("Mode:");
-tft.setCursor(100, 10);
-//Serial.println(screen);
-tft.print("               ");
-tft.setCursor(100, 10);
-if(sensorMode==BOTTOM_SENSOR_ONLY)tft.print("Base only");
-if(sensorMode==PROBE_SENSOR_ONLY)tft.print("Probe only");
-if(sensorMode==DUAL_MODE)tft.print("Dual Sensor");
-if(sensorMode==MANUL_MODE)tft.print("Manual");
 
-// Display Power
+canvas.drawBitmap(17, 4, intensity_icon, 16, 16, 0xFFFF); //Show intensity icon
 
-tft.setCursor(10, 30);
-tft.print("Power:");
-tft.setCursor(100, 30);
-tft.print(powerPercent);
+canvas.drawRect(5, 20, 41, 180, 0xFFFF); // Outer rectangle for power
+canvas.fillRect(10, 25+(170.0-170.0*powerPercent/100.0), 30, 5, 0x41F); //Level indicator for set power percent
+canvas.fillRect(12, 25+(170.0-170.0*duty_cycle/duty_windowSize), 25, 170.0*duty_cycle/duty_windowSize, 0xF900); //Actual duty cycle by control algorithm
 
-// Display Target Temperature
+canvas.setTextColor(0xFFFF);
+canvas.setFont(&FreeSerifBold12pt7b);
+canvas.setCursor(13, 117);
+canvas.printf("%d",int(powerPercent)); // Text for power percent
 
-tft.setCursor(10, 50);
-tft.print("Tset:");
-tft.setCursor(100, 50);
-tft.print(Tset);
+// Show target temperature icon and value
+canvas.drawBitmap(240, 144, target_icon, 15, 16, 0xFFFF);
+canvas.setFont(&FreeSansBold12pt7b);
+canvas.setTextSize(2);
+canvas.setCursor(195, 130);
+canvas.printf("%d", int(Tset));
 
-// Display bottom sensor temperature
-tft.setCursor(10, 70);
-tft.print("Tbase:");
-tft.setCursor(100, 70);
-tft.print(T_base);
+// Show probe temperature icon and value
+canvas.drawBitmap(53, 62, probe_sensor_icon, 16, 16, 0xFFFF);
+canvas.setTextColor(0xFFFF);
+canvas.setTextSize(2);
+canvas.setFont(&FreeSansBold18pt7b);
+canvas.setCursor(74, 92);
+canvas.printf("%d", int(T_probe));
 
-// Display probe sensor temperature
-tft.setCursor(10, 90);
-tft.print("Tprobe:");
-tft.setCursor(100, 90);
-tft.print(T_probe);
 
-//Display heater state
-tft.setCursor(10, 110);
-tft.print("Heater:");
-tft.setCursor(100, 110);
-tft.print(heaterState);
-// Display timer 
+// Show base temperature icon and value
+canvas.drawBitmap(52, 157, pan_sensor_icon, 15, 16, 0xFFFF);
+canvas.setFont(&FreeSansBold18pt7b);
+canvas.setCursor(73, 187);
+canvas.printf("%d", int(T_base));
+
+// Show heating mode
+canvas.setTextSize(1);
+canvas.setFont(&FreeSerifBold18pt7b);
+canvas.setTextColor(0x41F);
+canvas.setCursor(195, 64);
+if(sensorMode==BOTTOM_SENSOR_ONLY)canvas.print("Base");
+if(sensorMode==PROBE_SENSOR_ONLY)canvas.print("Probe");
+if(sensorMode==DUAL_MODE)canvas.print("Dual");
+if(sensorMode==MANUL_MODE)canvas.print("Manual");
+
+
+// Show heater state
+canvas.setTextColor(0xFC00);
+canvas.setTextSize(1);
+canvas.setFont(&FreeSerifBold18pt7b);
+canvas.setCursor(195, 185);
+if(heaterState==0)canvas.print("Standby");
+if(heaterState==1)canvas.print("Heating");
+
+
 }
 
 if(screen==TIME_SETING_SCREEN){
-tft.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-tft.setTextSize(2);
+canvas.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+canvas.setTextSize(2);
 
 // Display Mode
-tft.setCursor(10, 10);
-tft.print("HH:");
-tft.setCursor(10, 30);
-tft.print("MM:");
-tft.setCursor(10, 50);
-tft.print("SS");
+canvas.setCursor(10, 10);
+canvas.print("HH:");
+canvas.setCursor(10, 30);
+canvas.print("MM:");
+canvas.setCursor(10, 50);
+canvas.print("SS");
 
-tft.setCursor(80, 10);
-tft.print(timer_hours);
-tft.setCursor(80, 30);
-tft.print(timer_minutes);
-tft.setCursor(80, 50);
-tft.print(timer_seconds);
+canvas.setCursor(80, 10);
+canvas.print(timer_hours);
+canvas.setCursor(80, 30);
+canvas.print(timer_minutes);
+canvas.setCursor(80, 50);
+canvas.print(timer_seconds);
 
     }
+  
+//At the end, we push the canvas on to the display
+tft.drawRGBBitmap(0, 0, canvas.getBuffer(),canvas.width(), canvas.height());
   }
 }
 
@@ -552,6 +585,15 @@ void up_button_click(Button2& btn){
   }
 }
 
+void up_button_longclick(Button2& btn){
+  switch (screen){
+    case HOME_SCREEN:{ //On home screen, up will increment power percent
+      powerPercent+=10;
+      if(powerPercent>100)powerPercent=100;
+      break;
+    }
+  }
+}
 void down_button_click(Button2& btn){
 
   switch (screen){
@@ -562,6 +604,18 @@ void down_button_click(Button2& btn){
     }
   }
 }
+
+void down_button_longclick(Button2& btn){
+
+  switch (screen){
+    case HOME_SCREEN:{ //On home screen, down will decrement power percent
+      powerPercent-=10;
+      if(powerPercent<0)powerPercent=0;
+      break;
+    }
+  }
+}
+
 
 void left_button_click(Button2& btn){
 
