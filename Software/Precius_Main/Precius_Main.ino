@@ -234,6 +234,11 @@ Serial.println("Started Serial");
 
   // Initiate all hardware
 
+  //Sensors
+  pinMode(BASE_SENSOR_PIN, INPUT);
+  pinMode(PROBE_SENSOR_PIN, INPUT);
+  
+
   ///Buttons
 button_up.begin(BUTTON_UP_PIN,INPUT_PULLUP,true);
 button_down.begin(BUTTON_DOWN_PIN,INPUT_PULLUP,true);
@@ -269,6 +274,7 @@ button_enc.setClickHandler(enc_button_click);
 
   tft.init(240, 320);
   tft.setRotation(3);
+  tft.invertDisplay(ST77XX_INVOFF);
   tft.fillScreen(ST77XX_BLACK);
   tft.setTextColor(ST77XX_WHITE);
   tft.setTextSize(4);
@@ -410,7 +416,8 @@ if((TempK_probe<=100 || TempK_probe>500)&& (sensorMode==PROBE_SENSOR_ONLY || sen
   TempK_probe=273.15; //If reading is out of range, return 0 C
   heaterState=HEATER_OFF; //Turn off heater to prevent thermal runout
 }
-//Serial.println(TempK_probe);
+
+
 
 if(tempUnit==UNIT_C)T_probe=TempK_probe-273.15;
 if(tempUnit==UNIT_F)T_probe=((TempK_probe-273.15)*5.0/9.0)-32.0;
@@ -478,8 +485,9 @@ canvas.fillScreen(ST77XX_BLACK);
 canvas.drawBitmap(17, 4, intensity_icon, 16, 16, 0xFFFF); //Show intensity icon
 
 canvas.drawRect(5, 20, 41, 180, 0xFFFF); // Outer rectangle for power
-canvas.fillRect(10, 25+(170.0-170.0*powerPercent/100.0), 30, 5, 0x41F); //Level indicator for set power percent
 canvas.fillRect(12, 25+(170.0-170.0*duty_cycle/duty_windowSize), 25, 170.0*duty_cycle/duty_windowSize, 0xF900); //Actual duty cycle by control algorithm
+canvas.fillRect(10, 25+(170.0-170.0*powerPercent/100.0), 30, 5, 0x41F); //Level indicator for set power percent
+
 
 canvas.setTextColor(0xFFFF);
 canvas.setFont(&FreeSerifBold12pt7b);
@@ -559,10 +567,8 @@ tft.drawRGBBitmap(0, 0, canvas.getBuffer(),canvas.width(), canvas.height());
 void do_heater() {
   if ((duty_cycle >= loopTime - duty_windowStartTime) && (heaterState == HEATER_ON)) {
     digitalWrite(RELAY_PIN, HIGH);
-    // Serial.println("   Relay On");
   } else {
     digitalWrite(RELAY_PIN, LOW);
-    //Serial.println("   Relay Off");
   }
 }
 
