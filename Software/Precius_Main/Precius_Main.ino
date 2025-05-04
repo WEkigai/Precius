@@ -441,7 +441,7 @@ if((TempK_base<=100 || TempK_base>500)&&(sensorMode==BOTTOM_SENSOR_ONLY || senso
 if(tempUnit==UNIT_C)T_base=TempK_base-273.15;
 if(tempUnit==UNIT_F)T_base=((TempK_base-273.15)*5.0/9.0)-32.0;
 
-Serial.println(Rout_base);
+//Serial.println(Rout_base);
 
 // Read temperature of probe
 
