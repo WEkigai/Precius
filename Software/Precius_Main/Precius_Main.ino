@@ -194,7 +194,7 @@ float TempK_probe = 0.0;  // variable output
 
 
 //Parameters to refresh display
-unsigned int display_refresh_period = 500;  //milliseconds between display updates
+unsigned int display_refresh_period = 100;  //milliseconds between display updates
 unsigned long display_refresh_StartTime;    //start time of each refresh cycle
 static boolean flag_display_refresh = true;  //display refresh flag
 
@@ -377,6 +377,10 @@ if (encoderValue != lastEncoderValue) {
       }      
       case TIME_SETTING_SCREEN: {
         timer_minutes=timer_minutes+enc_change;
+        if(timer_minutes>59){
+          timer_hours++;
+          timer_minutes=0;
+        }
         break;
       }
       case SETTINGS_SCREEN: {
@@ -410,7 +414,7 @@ if (encoderValue != lastEncoderValue) {
   }
 
   if (loopTime - timer_refresh_StartTime > timer_refresh_period) {
-    timer_refresh_StartTime = +timer_refresh_period;
+    timer_refresh_StartTime += timer_refresh_period;
     flag_timer_refresh = true;
   }
 
@@ -603,7 +607,7 @@ canvas.print("Timer after target");
 
 if(screen==TIME_SETTING_SCREEN){
 Serial.println("Time Setting");
-
+canvas.fillScreen(ST77XX_BLACK);
 canvas.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
 canvas.setFont(&FreeSerifBold12pt7b);
 canvas.setTextSize(1);
@@ -627,6 +631,9 @@ canvas.print(timer_seconds);
   
 //At the end, we push the canvas on to the display
 tft.drawRGBBitmap(0, 0, canvas.getBuffer(),canvas.width(), canvas.height());
+
+//We are done with refreshing the display for now, so set flag back to false
+flag_display_refresh=false;
   }
 }
 
@@ -656,6 +663,7 @@ void do_timer() {
       }
     }
   }
+  flag_timer_refresh=false;
 }
 
 void up_button_click(Button2& btn){
@@ -775,7 +783,7 @@ if(screen==HOME_SCREEN){
   }
 if(screen==TIMER_SELECTION_SCREEN){
   if(timerMode==TARGET_AND_TIMER){
-    screen==TIME_SETTING_SCREEN;
+    screen=TIME_SETTING_SCREEN;
     return;
   }
   else
