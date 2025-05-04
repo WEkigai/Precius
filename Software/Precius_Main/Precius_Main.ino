@@ -50,6 +50,7 @@ Button2 button_enc(BUTTON_ENC_PIN,true);
 volatile int encoderValue = -998;
 volatile int lastStateA = 0;
 int lastEncoderValue = -999;
+int enc_change=0;
 
 /// Temperature sensors
 //// Bottom sensor
@@ -125,7 +126,6 @@ enum sensorModes {
 enum sensorModes sensorMode=BOTTOM_SENSOR_ONLY;
 
 
-
 enum timerModes {
   TARGET_AND_HOLD,  //Once target is reached, hold the target indefinitely
   TARGET_AND_STOP,  // Once the target is reached, stop heating
@@ -148,7 +148,8 @@ tempUnits tempUnit=UNIT_C;
 
 enum screens { //States for different screens to display
   HOME_SCREEN,  // Home Screen
-  TIME_SETING_SCREEN, //Time setting
+  TIMER_SELECTION_SCREEN, // Screen for selecting the mode of timer
+  TIME_SETTING_SCREEN, //Time setting
   SETTINGS_SCREEN   // Settings screen
 };
 screens screen=HOME_SCREEN;
@@ -274,7 +275,7 @@ button_enc.setClickHandler(enc_button_click);
 
   tft.init(240, 320);
   tft.setRotation(3);
-  tft.invertDisplay(ST77XX_INVOFF);
+  tft.invertDisplay(0);
   tft.fillScreen(ST77XX_BLACK);
   tft.setTextColor(ST77XX_WHITE);
   tft.setTextSize(4);
@@ -331,15 +332,51 @@ void loop()
 
 
 if (encoderValue != lastEncoderValue) {
+  //Calculate encoder change
+  enc_change=(encoderValue-lastEncoderValue); 
     switch (screen){
       case HOME_SCREEN: {
-        Tset = Tset+ (encoderValue-lastEncoderValue)*0.5;
+        Tset = Tset+ enc_change;
         if(Tset<10)Tset=10;
         if(tempUnit==UNIT_C && Tset>260)Tset=260;
         if(tempUnit==UNIT_F && Tset>550)Tset=500;
         break;
       }
-      case TIME_SETING_SCREEN: {
+
+      case TIMER_SELECTION_SCREEN: {
+        if(enc_change>0){ //encoder is changing positive (clockwise)
+        if(timerMode==TARGET_AND_HOLD){
+          timerMode=TARGET_AND_STOP;
+          break;
+        }
+        if(timerMode==TARGET_AND_STOP){
+          timerMode=TARGET_AND_TIMER;
+          break;
+        }
+        if(timerMode==TARGET_AND_TIMER){
+          timerMode=TARGET_AND_HOLD;
+          break;
+        }
+        }
+
+        if(enc_change<0){ //encoder is changing negative (counter-clockwise)
+        if(timerMode==TARGET_AND_HOLD){
+          timerMode=TARGET_AND_TIMER;
+          break;
+        }
+        if(timerMode==TARGET_AND_STOP){
+          timerMode=TARGET_AND_HOLD;
+          break;
+        }
+        if(timerMode==TARGET_AND_TIMER){
+          timerMode=TARGET_AND_STOP;
+          break;
+        }
+        }
+       break;
+      }      
+      case TIME_SETTING_SCREEN: {
+        timer_minutes=timer_minutes+enc_change;
         break;
       }
       case SETTINGS_SCREEN: {
@@ -404,7 +441,7 @@ if((TempK_base<=100 || TempK_base>500)&&(sensorMode==BOTTOM_SENSOR_ONLY || senso
 if(tempUnit==UNIT_C)T_base=TempK_base-273.15;
 if(tempUnit==UNIT_F)T_base=((TempK_base-273.15)*5.0/9.0)-32.0;
 
-//Serial.println(Rout_base);
+Serial.println(Rout_base);
 
 // Read temperature of probe
 
@@ -476,10 +513,12 @@ void do_display() {
     //We draw everything on to a canvas and at the end push to display
 
 if(screen==HOME_SCREEN){
+Serial.println("Home screen");
+
+
 // Clear display
 canvas.fillScreen(ST77XX_BLACK);
-//tft.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-//tft.setTextSize(2);
+
 
 
 canvas.drawBitmap(17, 4, intensity_icon, 16, 16, 0xFFFF); //Show intensity icon
@@ -538,26 +577,53 @@ if(heaterState==1)canvas.print("Heating");
 
 }
 
-if(screen==TIME_SETING_SCREEN){
+
+if(screen==TIMER_SELECTION_SCREEN){
+Serial.println("Timer Selection");
+
+canvas.fillScreen(ST77XX_BLACK);
 canvas.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
-canvas.setTextSize(2);
+canvas.setFont(&FreeSerifBold12pt7b);
+canvas.setTextSize(1);
+
+//Show the available options. The selected option is shown in a rectangle
+if(timerMode==TARGET_AND_HOLD)canvas.drawRect(10,10,200,30,ST77XX_WHITE);
+canvas.setCursor(10, 30);
+canvas.print("Hold at target");
+
+if(timerMode==TARGET_AND_STOP)canvas.drawRect(10,40,200,30,ST77XX_WHITE);
+canvas.setCursor(10, 60);
+canvas.print("Stop at target");
+
+if(timerMode==TARGET_AND_TIMER)canvas.drawRect(10,70,200,30,ST77XX_WHITE);
+canvas.setCursor(10, 90);
+canvas.print("Timer after target");
+}
+
+
+if(screen==TIME_SETTING_SCREEN){
+Serial.println("Time Setting");
+
+canvas.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
+canvas.setFont(&FreeSerifBold12pt7b);
+canvas.setTextSize(1);
 
 // Display Mode
-canvas.setCursor(10, 10);
+canvas.setCursor(10, 20);
 canvas.print("HH:");
-canvas.setCursor(10, 30);
+canvas.setCursor(10, 60);
 canvas.print("MM:");
-canvas.setCursor(10, 50);
+canvas.setCursor(10, 100);
 canvas.print("SS");
 
-canvas.setCursor(80, 10);
+canvas.setCursor(100, 20);
 canvas.print(timer_hours);
-canvas.setCursor(80, 30);
+canvas.setCursor(100, 60);
 canvas.print(timer_minutes);
-canvas.setCursor(80, 50);
+canvas.setCursor(100, 100);
 canvas.print(timer_seconds);
 
-    }
+}
   
 //At the end, we push the canvas on to the display
 tft.drawRGBBitmap(0, 0, canvas.getBuffer(),canvas.width(), canvas.height());
@@ -704,13 +770,23 @@ void mid_button_click(Button2& btn){
 void enc_button_click(Button2& btn){
 tft.fillScreen(ST77XX_BLACK);
 if(screen==HOME_SCREEN){
-  screen=TIME_SETING_SCREEN;
+  screen=TIMER_SELECTION_SCREEN;
   return;
   }
-if(screen==TIME_SETING_SCREEN){
+if(screen==TIMER_SELECTION_SCREEN){
+  if(timerMode==TARGET_AND_TIMER){
+    screen==TIME_SETTING_SCREEN;
+    return;
+  }
+  else
   screen=HOME_SCREEN;
   return;
   }  
+if(screen==TIME_SETTING_SCREEN){
+  screen=HOME_SCREEN;
+  return;
+  }
+
 }
 
 int smoothAnalog(int reading) 
