@@ -86,6 +86,7 @@ GFXcanvas16 canvas(320, 240); //Canvas object for rendering display off-screen
 #include <Fonts/FreeSansBold18pt7b.h>
 #include <Fonts/FreeSansBold12pt7b.h>
 #include <Fonts/FreeSerifBold18pt7b.h>
+#include <Fonts/FreeSansBold12pt7b.h>
 #include <Fonts/FreeSerifBold12pt7b.h>
 static const unsigned char PROGMEM intensity_icon[] = {0x00,0x00,0x00,0x00,0x00,0x40,0x00,0xc0,0x01,0x80,0x03,0x80,0x07,0x00,0x0f,0xe0,0x01,0xc0,0x03,0x80,0x03,0x00,0x06,0x00,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 static const unsigned char PROGMEM probe_sensor_icon[] = {0x00,0x08,0x00,0x14,0x00,0x22,0x00,0x51,0x00,0x8a,0x01,0x04,0x02,0x08,0x04,0x10,0x08,0x20,0x10,0x40,0x20,0x80,0x41,0x00,0x82,0x00,0x84,0x00,0x88,0x00,0xf0,0x00};
@@ -113,6 +114,7 @@ int timer_minutes = 10;
 int timer_seconds = 0;
 unsigned int timer_refresh_period = 1000;  //How often will we decrement the timer (ms)
 static boolean flag_timer_refresh = false;
+static boolean flag_timer_started = false;
 unsigned long timer_refresh_StartTime = 0;
 
 // State/mode variables
@@ -482,13 +484,16 @@ void do_statemachine()
 
   switch (timerMode) {
     case TARGET_AND_HOLD:
+      flag_timer_started=false; //Ensure timer is off / paused
       break;
 
     case TARGET_AND_STOP:
       if (Tnow >= Tset) heaterState = HEATER_OFF;  //If we have exceeded the target temperature, stop heating
+      flag_timer_started=false; //Ensure timer is off / paused
       break;
 
     case TARGET_AND_TIMER:
+    if ((Tnow >= Tset) && heaterState==HEATER_ON) flag_timer_started=true; //If we have reached the target temperature, we can start the timer. Check for heater state to make sure we do not prematurely start timer before target temperature is set by the user
       do_timer();
       if (timer_hours == 0 && timer_minutes == 0 && timer_seconds == 0) heaterState = HEATER_OFF;  //If the timer is done, turn the heater off
       break;
@@ -522,15 +527,11 @@ Serial.println("Home screen");
 
 // Clear display
 canvas.fillScreen(ST77XX_BLACK);
-
-
-
 canvas.drawBitmap(17, 4, intensity_icon, 16, 16, 0xFFFF); //Show intensity icon
 
 canvas.drawRect(5, 20, 41, 180, 0xFFFF); // Outer rectangle for power
 canvas.fillRect(12, 25+(170.0-170.0*duty_cycle/duty_windowSize), 25, 170.0*duty_cycle/duty_windowSize, 0xF900); //Actual duty cycle by control algorithm
 canvas.fillRect(10, 25+(170.0-170.0*powerPercent/100.0), 30, 5, 0x41F); //Level indicator for set power percent
-
 
 canvas.setTextColor(0xFFFF);
 canvas.setFont(&FreeSerifBold12pt7b);
@@ -552,7 +553,6 @@ canvas.setFont(&FreeSansBold18pt7b);
 canvas.setCursor(74, 92);
 canvas.printf("%d", int(T_probe));
 
-
 // Show base temperature icon and value
 canvas.drawBitmap(52, 157, pan_sensor_icon, 15, 16, 0xFFFF);
 canvas.setFont(&FreeSansBold18pt7b);
@@ -569,7 +569,6 @@ if(sensorMode==PROBE_SENSOR_ONLY)canvas.print("Probe");
 if(sensorMode==DUAL_MODE)canvas.print("Dual");
 if(sensorMode==MANUL_MODE)canvas.print("Manual");
 
-
 // Show heater state
 canvas.setTextColor(0xFC00);
 canvas.setTextSize(1);
@@ -578,6 +577,15 @@ canvas.setCursor(195, 185);
 if(heaterState==0)canvas.print("Standby");
 if(heaterState==1)canvas.print("Heating");
 
+
+//Show the timer
+if(timerMode==TARGET_AND_TIMER){
+canvas.setTextColor(0xFFFF);
+canvas.setTextSize(1);
+canvas.setFont(&FreeSansBold12pt7b);
+canvas.setCursor(200, 25);
+canvas.printf("%.2d:%.2d:%.2d",timer_hours,timer_minutes,timer_seconds);
+}
 
 }
 
@@ -646,6 +654,7 @@ void do_heater() {
 }
 
 void do_timer() {
+  if (flag_timer_started==true){ //Check if the timer has started
   if (flag_timer_refresh) {
 
     if (timer_seconds > 0) {
@@ -662,8 +671,9 @@ void do_timer() {
         }
       }
     }
+    flag_timer_refresh=false; // Now we have updated the timer, so set the flag back to false
   }
-  flag_timer_refresh=false;
+  }
 }
 
 void up_button_click(Button2& btn){
