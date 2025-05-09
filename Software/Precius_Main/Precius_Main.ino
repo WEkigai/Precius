@@ -162,6 +162,7 @@ screens screen=HOME_SCREEN;
 
 ArduPID myPID;  // PID object
 double control_output = 0.0;
+double Kp=100.0, Ki=10.0, Kd=20.0; //Parameters for PID control
 
 
 // Parameters for converting PID output to PWM
@@ -307,7 +308,7 @@ button_enc.setClickHandler(enc_button_click);
   display_refresh_StartTime = millis();
 
   // Initiate control
-  myPID.begin(&Tnow, &control_output, &Tset, 100, 1.0, 10.0);
+  myPID.begin(&Tnow, &control_output, &Tset, Kp, Ki, Kd);
   myPID.setOutputLimits(0, duty_windowSize * powerPercent * 0.01);
   myPID.setWindUpLimits(0, 1000);
   myPID.start();
@@ -460,8 +461,6 @@ if((TempK_probe<=100 || TempK_probe>500)&& (sensorMode==PROBE_SENSOR_ONLY || sen
   heaterState=HEATER_OFF; //Turn off heater to prevent thermal runout
 }
 
-
-
 if(tempUnit==UNIT_C)T_probe=TempK_probe-273.15;
 if(tempUnit==UNIT_F)T_probe=((TempK_probe-273.15)*5.0/9.0)-32.0;
 }
@@ -488,12 +487,12 @@ void do_statemachine()
       break;
 
     case TARGET_AND_STOP:
-      if (Tnow >= Tset) heaterState = HEATER_OFF;  //If we have exceeded the target temperature, stop heating
+      if (abs(Tnow -Tset)<1) heaterState = HEATER_OFF;  //If we have exceeded the target temperature, stop heating
       flag_timer_started=false; //Ensure timer is off / paused
       break;
 
     case TARGET_AND_TIMER:
-    if ((Tnow >= Tset) && heaterState==HEATER_ON) flag_timer_started=true; //If we have reached the target temperature, we can start the timer. Check for heater state to make sure we do not prematurely start timer before target temperature is set by the user
+    if ((abs(Tnow -Tset)<1) && heaterState==HEATER_ON) flag_timer_started=true; //If we have reached the target temperature, we can start the timer. Check for heater state to make sure we do not prematurely start timer before target temperature is set by the user
       do_timer();
       if (timer_hours == 0 && timer_minutes == 0 && timer_seconds == 0) heaterState = HEATER_OFF;  //If the timer is done, turn the heater off
       break;
@@ -521,8 +520,19 @@ void do_display() {
   if (flag_display_refresh) {
     //We draw everything on to a canvas and at the end push to display
 
+
+//We can also use the display refresh to debug PID parameters via serial
+myPID.debug(&Serial, "PID", PRINT_INPUT    | // Can include or comment out any of these terms to print
+                                              PRINT_OUTPUT   | // in the Serial plotter
+                                              PRINT_SETPOINT |
+                                              //PRINT_BIAS     |
+                                              PRINT_P        |
+                                              PRINT_I        |
+                                              PRINT_D);
+
+                                              
 if(screen==HOME_SCREEN){
-Serial.println("Home screen");
+//Serial.println("Home screen");
 
 
 // Clear display
@@ -591,7 +601,7 @@ canvas.printf("%.2d:%.2d:%.2d",timer_hours,timer_minutes,timer_seconds);
 
 
 if(screen==TIMER_SELECTION_SCREEN){
-Serial.println("Timer Selection");
+//Serial.println("Timer Selection");
 
 canvas.fillScreen(ST77XX_BLACK);
 canvas.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
@@ -614,7 +624,7 @@ canvas.print("Timer after target");
 
 
 if(screen==TIME_SETTING_SCREEN){
-Serial.println("Time Setting");
+//Serial.println("Time Setting");
 canvas.fillScreen(ST77XX_BLACK);
 canvas.setTextColor(ST77XX_WHITE, ST77XX_BLACK);
 canvas.setFont(&FreeSerifBold12pt7b);
@@ -807,7 +817,7 @@ if(screen==TIME_SETTING_SCREEN){
 
 }
 
-int smoothAnalog(int reading) 
+int smoothAnalog(int reading) //Returns a smoothed average of analog read
 {
   const int numSamples = 20;
   static int samples[numSamples];
