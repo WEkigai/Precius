@@ -201,6 +201,11 @@ unsigned int display_refresh_period = 100;  //milliseconds between display updat
 unsigned long display_refresh_StartTime;    //start time of each refresh cycle
 static boolean flag_display_refresh = true;  //display refresh flag
 
+//Parameters to refresh the serial output
+
+unsigned int serialout_refresh_period = 5000;  //milliseconds between display updates
+unsigned long serialout_refresh_StartTime;    //start time of each refresh cycle
+static boolean flag_serialout_refresh = true;  //display refresh flag
 
 //Function prototypes
 void do_readTemp();      //Function to handle temperature readings
@@ -209,6 +214,7 @@ void do_heater();        // Function to handle heater
 void do_statemachine();  // Handles all states; sets variables to right value depending on state
 void do_timer();         //Handles the timer countdown
 void do_control();       // Handles the control algorithm
+void do_serialout(); //Function to write the parameters on serial monitor
 int smoothAnalog(int reading); //Smooth reading of analog inputs
 
 void up_button_click(Button2& btn);
@@ -252,17 +258,25 @@ button_mid.begin(BUTTON_MID_PIN,INPUT_PULLUP,true);
 button_enc.begin(BUTTON_ENC_PIN,INPUT_PULLUP,true);
 
 button_up.setClickHandler(up_button_click);
+//button_up.setDebounceTime(80);
+button_up.setLongClickTime(400);
 button_up.setLongClickDetectedHandler(up_button_longclick);
 button_up.setLongClickDetectedRetriggerable(true);
 
 button_down.setClickHandler(down_button_click);
+//button_down.setDebounceTime(80);
+button_down.setLongClickTime(400);
 button_down.setLongClickDetectedHandler(down_button_longclick);
 button_down.setLongClickDetectedRetriggerable(true);
 
 button_left.setClickHandler(left_button_click);
+//button_left.setDebounceTime(80);
 button_right.setClickHandler(right_button_click);
+//button_right.setDebounceTime(80);
 button_mid.setClickHandler(mid_button_click);
+//button_mid.setDebounceTime(80);
 button_enc.setClickHandler(enc_button_click);
+//button_enc.setDebounceTime(80);
 
 
 
@@ -404,25 +418,36 @@ if (encoderValue != lastEncoderValue) {
   do_control();
 
 
-// Update all timers at the end of the loop (heater, display, timer) and set flags to refresh
+// Update all timers at the end of the loop (heater, display, timer, serialoutput) and set flags to refresh
   //check relay window time
   if (loopTime - duty_windowStartTime > duty_windowSize) {
     //time to shift the Relay Window
     duty_windowStartTime += duty_windowSize;
   }
 
+//Check display refresh time
   if (loopTime - display_refresh_StartTime > display_refresh_period) {
     display_refresh_StartTime += display_refresh_period;
     flag_display_refresh = true;
   }
 
+//Check timer refresh time
   if (loopTime - timer_refresh_StartTime > timer_refresh_period) {
     timer_refresh_StartTime += timer_refresh_period;
     flag_timer_refresh = true;
   }
 
+//Check Serial output refresh time
+  if (loopTime - serialout_refresh_StartTime > serialout_refresh_period) {
+    serialout_refresh_StartTime += serialout_refresh_period;
+    flag_serialout_refresh = true;
+  }
+
   // Update display
   do_display();
+
+  //Update serial output
+  do_serialout();
 
   // Update heater
   do_heater();
@@ -519,16 +544,6 @@ void do_display() {
 //if it is time to update display update it and set the refresh flag back to false
   if (flag_display_refresh) {
     //We draw everything on to a canvas and at the end push to display
-
-
-//We can also use the display refresh to debug PID parameters via serial
-myPID.debug(&Serial, "PID", PRINT_INPUT    | // Can include or comment out any of these terms to print
-                                              PRINT_OUTPUT   | // in the Serial plotter
-                                              PRINT_SETPOINT |
-                                              //PRINT_BIAS     |
-                                              PRINT_P        |
-                                              PRINT_I        |
-                                              PRINT_D);
 
                                               
 if(screen==HOME_SCREEN){
@@ -653,6 +668,25 @@ tft.drawRGBBitmap(0, 0, canvas.getBuffer(),canvas.width(), canvas.height());
 //We are done with refreshing the display for now, so set flag back to false
 flag_display_refresh=false;
   }
+}
+
+
+void do_serialout(){
+  if(flag_serialout_refresh==true)
+  {
+    
+//We can also use the display refresh to debug PID parameters via serial
+myPID.debug(&Serial, "PID", PRINT_INPUT    | // Can include or comment out any of these terms to print
+                                              PRINT_OUTPUT   | // in the Serial plotter
+                                              PRINT_SETPOINT |
+                                              //PRINT_BIAS     |
+                                              PRINT_P        |
+                                              PRINT_I        |
+                                              PRINT_D);
+
+  flag_serialout_refresh=false;
+  }
+
 }
 
 void do_heater() {
