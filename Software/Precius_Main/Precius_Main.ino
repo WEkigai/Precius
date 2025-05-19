@@ -85,9 +85,8 @@ GFXcanvas16 canvas(320, 240); //Canvas object for rendering display off-screen
 // Icons and fonts
 #include <Fonts/FreeSansBold18pt7b.h>
 #include <Fonts/FreeSansBold12pt7b.h>
-#include <Fonts/FreeSerifBold18pt7b.h>
-#include <Fonts/FreeSansBold12pt7b.h>
 #include <Fonts/FreeSerifBold12pt7b.h>
+
 static const unsigned char PROGMEM intensity_icon[] = {0x00,0x00,0x00,0x00,0x00,0x40,0x00,0xc0,0x01,0x80,0x03,0x80,0x07,0x00,0x0f,0xe0,0x01,0xc0,0x03,0x80,0x03,0x00,0x06,0x00,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 static const unsigned char PROGMEM probe_sensor_icon[] = {0x00,0x08,0x00,0x14,0x00,0x22,0x00,0x51,0x00,0x8a,0x01,0x04,0x02,0x08,0x04,0x10,0x08,0x20,0x10,0x40,0x20,0x80,0x41,0x00,0x82,0x00,0x84,0x00,0x88,0x00,0xf0,0x00};
 static const unsigned char PROGMEM target_icon[] = {0x01,0x00,0x03,0x80,0x0d,0x60,0x11,0x10,0x20,0x08,0x20,0x08,0x41,0x04,0xf2,0x9e,0x41,0x04,0x20,0x08,0x20,0x08,0x11,0x10,0x0d,0x60,0x03,0x80,0x01,0x00,0x00,0x00};
@@ -99,7 +98,7 @@ double Tset = -1.0;           //The target temperature setpoint
 double Tnow = -1.0;           // The current temperature
 double T_base = -1.0;        //Temperature of the bottom sensor
 double T_probe = -1.0;         // Temperature of the probe sensor
-double dual_mode_buffer = 0;  //The difference in dual mode between probe and bottom sensors
+double dual_mode_buffer = 20;  //The difference in dual mode between probe and bottom sensors
 
 // Power variables
 float powerPercent = 50.0;  //Heater power compared to maximum possible power
@@ -162,8 +161,8 @@ screens screen=HOME_SCREEN;
 
 ArduPID myPID;  // PID object
 double control_output = 0.0;
-double Kp=100.0, Ki=10.0, Kd=20.0; //Parameters for PID control
-
+double Kp=300.0, Ki=0.2, Kd=20000.0; //Parameters for PID control
+// Kp=300.0, Ki=0.2, Kd=20000.0 best parameters so far for 80 C target
 
 // Parameters for converting PID output to PWM
 unsigned int duty_windowSize = 5000;  //total duty cycle of 5 seconds
@@ -181,7 +180,7 @@ float T_0_base = 298.15;   // use T_0 in Kelvin [K]
 float Vout_base = 0.0;     // Vout
 float Rout_base = 0.0;     // Rout 
 // use the datasheet to get this data.
-float beta_base = 3990;  // initial parameters [K]
+float beta_base = 3950;  // initial parameters [K]
 float TempK_base = 0.0;  // variable output
 
 // NTC parameters for probe sensor
@@ -191,7 +190,7 @@ float T_0_probe = 298.15;   // use T_0 in Kelvin [K]
 float Vout_probe = 0.0;     // Vout
 float Rout_probe = 0.0;     // Rout
 // use the datasheet to get this data.
-float beta_probe = 3990;  // initial parameters [K]
+float beta_probe = 3950;  // initial parameters [K]
 float TempK_probe = 0.0;  // variable output
 
 
@@ -203,7 +202,7 @@ static boolean flag_display_refresh = true;  //display refresh flag
 
 //Parameters to refresh the serial output
 
-unsigned int serialout_refresh_period = 5000;  //milliseconds between display updates
+unsigned int serialout_refresh_period = 10000;  //milliseconds between display updates
 unsigned long serialout_refresh_StartTime;    //start time of each refresh cycle
 static boolean flag_serialout_refresh = true;  //display refresh flag
 
@@ -324,7 +323,7 @@ button_enc.setClickHandler(enc_button_click);
   // Initiate control
   myPID.begin(&Tnow, &control_output, &Tset, Kp, Ki, Kd);
   myPID.setOutputLimits(0, duty_windowSize * powerPercent * 0.01);
-  myPID.setWindUpLimits(0, 1000);
+  myPID.setSampleTime(10000); //Since thermal process is slow, it is enough to run PID only once a few seconds. Running more frequently messes with derivatives due to noise
   myPID.start();
 }
 
@@ -528,7 +527,9 @@ void do_control(){
   if(sensorMode!=MANUL_MODE){ //we are in modes that require control
   //perform PID calculations
   myPID.setOutputLimits(0, duty_windowSize*powerPercent*0.01);
-  myPID.setWindUpLimits(0,2*Tset);//Seeting windup limits based on target temperature. Higher setpoints need higher I term to stabilize temperature due to ambient losses
+  //myPID.setWindUpLimits(0,2*Tset);//Seeting windup limits based on target temperature. Higher setpoints need higher I term to stabilize temperature due to ambient losses
+  //myPID.setWindUpLimits(0, 0.1*duty_windowSize*powerPercent*0.01); //We limit the integratl windup to a fraction of total power output
+  //Kd=1000.0*Tset; //We want to keep stable temperature with Kd. Higher temperatures have higher heat loss, needing higher power to stay stable
   myPID.compute();
   duty_cycle=control_output;
 
@@ -538,7 +539,6 @@ void do_control(){
     duty_cycle=duty_windowSize*powerPercent*0.01;
   }
 }
-
 
 void do_display() {
 //if it is time to update display update it and set the refresh flag back to false
@@ -552,6 +552,8 @@ if(screen==HOME_SCREEN){
 
 // Clear display
 canvas.fillScreen(ST77XX_BLACK);
+canvas.setTextWrap(false);
+
 canvas.drawBitmap(17, 4, intensity_icon, 16, 16, 0xFFFF); //Show intensity icon
 
 canvas.drawRect(5, 20, 41, 180, 0xFFFF); // Outer rectangle for power
@@ -576,19 +578,19 @@ canvas.setTextColor(0xFFFF);
 canvas.setTextSize(2);
 canvas.setFont(&FreeSansBold18pt7b);
 canvas.setCursor(74, 92);
-canvas.printf("%d", int(T_probe));
+canvas.printf("%.1f", T_probe);
 
 // Show base temperature icon and value
 canvas.drawBitmap(52, 157, pan_sensor_icon, 15, 16, 0xFFFF);
 canvas.setFont(&FreeSansBold18pt7b);
 canvas.setCursor(73, 187);
-canvas.printf("%d", int(T_base));
+canvas.printf("%.1f", T_base);
 
 // Show heating mode
 canvas.setTextSize(1);
-canvas.setFont(&FreeSerifBold18pt7b);
+canvas.setFont(&FreeSerifBold12pt7b);
 canvas.setTextColor(0x41F);
-canvas.setCursor(195, 64);
+canvas.setCursor(245, 64);
 if(sensorMode==BOTTOM_SENSOR_ONLY)canvas.print("Base");
 if(sensorMode==PROBE_SENSOR_ONLY)canvas.print("Probe");
 if(sensorMode==DUAL_MODE)canvas.print("Dual");
@@ -597,8 +599,8 @@ if(sensorMode==MANUL_MODE)canvas.print("Manual");
 // Show heater state
 canvas.setTextColor(0xFC00);
 canvas.setTextSize(1);
-canvas.setFont(&FreeSerifBold18pt7b);
-canvas.setCursor(195, 185);
+canvas.setFont(&FreeSerifBold12pt7b);
+canvas.setCursor(245, 185);
 if(heaterState==0)canvas.print("Standby");
 if(heaterState==1)canvas.print("Heating");
 
