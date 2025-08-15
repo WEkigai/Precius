@@ -8,6 +8,8 @@ Main project page https://github.com/WEkigai/Precius
 
 ------------------------------------------*/
 
+/* This version is compatible with hardware version 0.2*/
+
 // Include libraries
 #include <Arduino.h>
 #include <SPI.h>
@@ -54,9 +56,13 @@ int enc_change=0;
 
 /// Temperature sensors
 //// Bottom sensor
-#define BASE_SENSOR_PIN 5
+#define BASE_SENSOR_PIN 4
+
 //// Probe sensor
-#define PROBE_SENSOR_PIN 6
+/// Pseudo 3 wire implementation after https://raspberrypi.stackexchange.com/questions/54760/ads1115-pt100-circuit 
+#define PROBE_SENSOR_PIN_HIGH 5
+#define PROBE_SENSOR_PIN_LOW 6 
+
 // Outputs
 /// Heater output realy (using LED pin for easy debug)
 #define RELAY_PIN 41 //Relay on pin 41
@@ -183,14 +189,15 @@ float Rout_base = 0.0;     // Rout
 float beta_base = 3950;  // initial parameters [K]
 float TempK_base = 0.0;  // variable output
 
-// NTC parameters for probe sensor
-float R_ref_probe = 10000;  // Reference Resistor t [ohm]
-float R_0_probe = 100000;   // value of rct in T_0 [ohm]
+// NTC parameters for probe sensor. This is a PT1000 sensor
+float R_ref_probe = 1000;  // Reference Resistor t [ohm]
+float R_0_probe = 1000;   // value of rct in T_0 [ohm]
 float T_0_probe = 298.15;   // use T_0 in Kelvin [K]
-float Vout_probe = 0.0;     // Vout
+float Vout_probe_high = 0.0;     // Vout - high pin
+float Vout_probe_low = 0.0;     // Vout - low pin
 float Rout_probe = 0.0;     // Rout
 // use the datasheet to get this data.
-float beta_probe = 3950;  // initial parameters [K]
+//float beta_probe = 3950;  // initial parameters [K] Beta not needed for PT1000
 float TempK_probe = 0.0;  // variable output
 
 
@@ -245,7 +252,8 @@ Serial.println("Started Serial");
 
   //Sensors
   pinMode(BASE_SENSOR_PIN, INPUT);
-  pinMode(PROBE_SENSOR_PIN, INPUT);
+  pinMode(PROBE_SENSOR_PIN_HIGH, INPUT);
+  pinMode(PROBE_SENSOR_PIN_LOW, INPUT);
   
 
   ///Buttons
@@ -291,7 +299,7 @@ button_enc.setClickHandler(enc_button_click);
 
   tft.init(240, 320);
   tft.setRotation(3);
-  tft.invertDisplay(0);
+  //tft.invertDisplay(0);
   tft.fillScreen(ST77XX_BLACK);
   tft.setTextColor(ST77XX_WHITE);
   tft.setTextSize(4);
@@ -458,13 +466,14 @@ void do_readTemp()
 {
 
 // Read temperature of base
+//We smooth the reading by averaging it over 1000 values
 
-//Vout_base=float(analogReadMilliVolts(BASE_SENSOR_PIN))/1000.0;
-Vout_base=float(smoothAnalog(analogReadMilliVolts(BASE_SENSOR_PIN)))/1000.0;
+Vout_base=((Vout_base*999.0)+float(analogReadMilliVolts(BASE_SENSOR_PIN))/1000.0)/1000.0;
 Rout_base=R_ref_base*(Vref/Vout_base - 1.0);
+//Serial.println(Rout_base);
 TempK_base=1.0/(((log(Rout_base/R_0_base))/beta_base)+(1/(T_0_base)));
 
-if((TempK_base<=100 || TempK_base>500)&&(sensorMode==BOTTOM_SENSOR_ONLY || sensorMode==DUAL_MODE)){
+if((TempK_base<=100 || TempK_base>533.15)&&(sensorMode==BOTTOM_SENSOR_ONLY || sensorMode==DUAL_MODE)){
   TempK_base=273.15; //If reading is out of range, return 0 C
   heaterState=HEATER_OFF; //Turn off heater to prevent thermal runout
 }
@@ -475,10 +484,12 @@ if(tempUnit==UNIT_F)T_base=((TempK_base-273.15)*5.0/9.0)-32.0;
 //Serial.println(Rout_base);
 
 // Read temperature of probe
+//We smooth the reading by averaging it over 1000 values
+Vout_probe_high=((Vout_probe_high*999.0)+float(analogReadMilliVolts(PROBE_SENSOR_PIN_HIGH)))/1000.0;
+Vout_probe_low=((Vout_probe_low*999.0)+ float(analogReadMilliVolts(PROBE_SENSOR_PIN_LOW)))/1000.0;
+Rout_probe=R_ref_probe*(Vout_probe_low-0.0) / (Vout_probe_high-Vout_probe_low);
+TempK_probe=273.15+(Rout_probe-1000.0)*(523.15-273.15)/(1940.981-1000.0); // For now, a linear approximation for PT1000 resistances In future to implement https://www.fluke.com/en-us/learn/tools-calculators/pt100-table-generator
 
-Vout_probe=float(analogReadMilliVolts(PROBE_SENSOR_PIN))/1000.0;
-Rout_probe=R_ref_probe*(Vref/Vout_probe - 1.0);
-TempK_probe=1.0/(((log(Rout_probe/R_0_probe))/beta_probe)+(1/(T_0_probe)));
 
 if((TempK_probe<=100 || TempK_probe>500)&& (sensorMode==PROBE_SENSOR_ONLY || sensorMode==DUAL_MODE)){
   TempK_probe=273.15; //If reading is out of range, return 0 C
