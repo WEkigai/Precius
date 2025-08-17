@@ -221,7 +221,6 @@ void do_statemachine();  // Handles all states; sets variables to right value de
 void do_timer();         //Handles the timer countdown
 void do_control();       // Handles the control algorithm
 void do_serialout(); //Function to write the parameters on serial monitor
-int smoothAnalog(int reading); //Smooth reading of analog inputs
 
 void up_button_click(Button2& btn);
 void up_button_longclick(Button2& btn);
@@ -310,6 +309,10 @@ button_enc.setClickHandler(enc_button_click);
   tft.setCursor(80, 100);
   tft.print("Precius");
   delay(2000);
+  tft.setCursor(20, 200);
+  tft.setTextSize(2);
+  tft.print("HW: 0.2, SW: 0.3-dev");
+  delay(4000);
   tft.fillScreen(ST77XX_BLACK);
 
 
@@ -862,24 +865,4 @@ if(screen==TIME_SETTING_SCREEN){
   return;
   }
 
-}
-
-int smoothAnalog(int reading) //Returns a smoothed average of analog read
-{
-  const int numSamples = 20;
-  static int samples[numSamples];
-  static int sampleIndex = 0;
-  static int sampleSum = 0;
-
-  // NOTE: It will take 20 measurements to fill the sample
-  // array and return a true smoothed value. 
-  
-  // Update sum
-  sampleSum -= samples[sampleIndex];
-  samples[sampleIndex] = reading;
-  sampleSum += samples[sampleIndex++];
-  sampleIndex = sampleIndex % numSamples;
-
-  // Return average of last numSamples measurements
-  return sampleSum/numSamples;
 }
