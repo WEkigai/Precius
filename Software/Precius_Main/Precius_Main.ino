@@ -67,6 +67,9 @@ int enc_change=0;
 /// Heater output realy (using LED pin for easy debug)
 #define RELAY_PIN 41 //Relay on pin 41
 
+//Relay for Auxillary power output
+#define AUX_RELAY_PIN 9
+
 //Buzzer
 #define BUZZER_PIN 35  // Buzzer on pin 35
 
@@ -104,6 +107,8 @@ double Tset = -1.0;           //The target temperature setpoint
 double Tnow = -1.0;           // The current temperature
 double T_base = -1.0;        //Temperature of the bottom sensor
 double T_probe = -1.0;         // Temperature of the probe sensor
+double Calibration_T_base = 0.0; //Calibration (correction) for base sensor. Positive numbers add to measured value.
+double Calibration_T_probe = 6.5; //Calibration (correction) for probe sensor. Positive numbers add to measured value.
 double dual_mode_buffer = 20;  //The difference in dual mode between probe and bottom sensors
 
 // Power variables
@@ -321,8 +326,12 @@ button_enc.setClickHandler(enc_button_click);
   digitalWrite(LED_PIN, LOW);
 
 // Relay Pin
-  pinMode(RELAY_PIN, OUTPUT);    // SSR is an output now
+  pinMode(RELAY_PIN, OUTPUT);    // Main heater output
   digitalWrite(RELAY_PIN, LOW);  // Start with SSR OFF
+
+//Aux relay pin
+  pinMode(AUX_RELAY_PIN,OUTPUT); //Relay pin for Auxillary power
+  digitalWrite(AUX_RELAY_PIN, HIGH); //We can keep the auxillary power turned on unless specifically needed to be turned off. It is low volt and open when there is no load.
 
 
   // Initiate times
@@ -481,15 +490,15 @@ if((TempK_base<=100 || TempK_base>533.15)&&(sensorMode==BOTTOM_SENSOR_ONLY || se
   heaterState=HEATER_OFF; //Turn off heater to prevent thermal runout
 }
 
-if(tempUnit==UNIT_C)T_base=TempK_base-273.15;
-if(tempUnit==UNIT_F)T_base=((TempK_base-273.15)*5.0/9.0)-32.0;
+if(tempUnit==UNIT_C)T_base=Calibration_T_base + TempK_base-273.15;
+if(tempUnit==UNIT_F)T_base=Calibration_T_base + ((TempK_base-273.15)*5.0/9.0)-32.0;
 
 //Serial.println(Rout_base);
 
 // Read temperature of probe
-//We smooth the reading by averaging it over 1000 values
-Vout_probe_high=((Vout_probe_high*999.0)+float(analogReadMilliVolts(PROBE_SENSOR_PIN_HIGH)))/1000.0;
-Vout_probe_low=((Vout_probe_low*999.0)+ float(analogReadMilliVolts(PROBE_SENSOR_PIN_LOW)))/1000.0;
+//We smooth the reading by averaging it over 10000 values (more sampling needed because probe sensor is noisier due to not having a capacitor in parallel)
+Vout_probe_high=((Vout_probe_high*9999.0)+float(analogReadMilliVolts(PROBE_SENSOR_PIN_HIGH)))/10000.0;
+Vout_probe_low=((Vout_probe_low*9999.0)+ float(analogReadMilliVolts(PROBE_SENSOR_PIN_LOW)))/10000.0;
 Rout_probe=R_ref_probe*(Vout_probe_low-0.0) / (Vout_probe_high-Vout_probe_low);
 TempK_probe=273.15+(Rout_probe-1000.0)*(523.15-273.15)/(1940.981-1000.0); // For now, a linear approximation for PT1000 resistances In future to implement https://www.fluke.com/en-us/learn/tools-calculators/pt100-table-generator
 
@@ -499,8 +508,8 @@ if((TempK_probe<=100 || TempK_probe>500)&& (sensorMode==PROBE_SENSOR_ONLY || sen
   heaterState=HEATER_OFF; //Turn off heater to prevent thermal runout
 }
 
-if(tempUnit==UNIT_C)T_probe=TempK_probe-273.15;
-if(tempUnit==UNIT_F)T_probe=((TempK_probe-273.15)*5.0/9.0)-32.0;
+if(tempUnit==UNIT_C)T_probe=Calibration_T_probe + TempK_probe-273.15;
+if(tempUnit==UNIT_F)T_probe=Calibration_T_probe+ ((TempK_probe-273.15)*5.0/9.0)-32.0;
 }
 
 void do_statemachine()
