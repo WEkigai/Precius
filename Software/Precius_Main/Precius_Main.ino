@@ -24,7 +24,6 @@ Main project page https://github.com/WEkigai/Precius
 
 // Inputs
 
-
 /// Buttons
 #define BUTTON_DOWN_PIN 36
 Button2 button_down(BUTTON_DOWN_PIN, true);
@@ -205,6 +204,37 @@ float Rout_probe = 0.0;     // Rout
 //float beta_probe = 3950;  // initial parameters [K] Beta not needed for PT1000
 float TempK_probe = 0.0;  // variable output
 
+// Resistance of PT1000 sensor for each 1k increment between 273.15 and 573.15 (0-300C) from https://www.fluke.com/nl-nl/informatie/instrumenten-calculators/pt100-table-generator
+float PT1000_Resistances[] = {1000, 1003.9077, 1007.8143, 1011.7197, 1015.624, 1019.5271, 1023.429, 1027.3298, 1031.2294, 1035.1279, 1039.0252, 
+                              1042.9214, 1046.8164, 1050.7103, 1054.603, 1058.4946, 1062.385, 1066.2742, 1070.1623, 1074.0492, 1077.935, 
+                              1081.8196, 1085.7031, 1089.5854, 1093.4666, 1097.3466, 1101.2254, 1105.1031, 1108.9796, 1112.855, 1116.7292, 
+                              1120.6023, 1124.4742, 1128.345, 1132.2146, 1136.0831, 1139.9504, 1143.8165, 1147.6815, 1151.5453, 1155.408, 
+                              1159.2695, 1163.1299, 1166.9891, 1170.8472, 1174.7041, 1178.5598, 1182.4144, 1186.2678, 1190.1201, 1193.9713, 
+                              1197.8212, 1201.67, 1205.5177, 1209.3642, 1213.2096, 1217.0538, 1220.8968, 1224.7387, 1228.5794, 1232.419, 
+                              1236.2574, 1240.0947, 1243.9308, 1247.7658, 1251.5996, 1255.4322, 1259.2637, 1263.094, 1266.9232, 1270.7513, 
+                              1274.5781, 1278.4038, 1282.2284, 1286.0518, 1289.8741, 1293.6952, 1297.5151, 1301.3339, 1305.1515, 1308.968, 
+                              1312.7833, 1316.5975, 1320.4105, 1324.2224, 1328.0331, 1331.8426, 1335.651, 1339.4582, 1343.2643, 1347.0693, 
+                              1350.873, 1354.6756, 1358.4771, 1362.2774, 1366.0766, 1369.8746, 1373.6714, 1377.4671, 1381.2616, 1385.055, 
+                              1388.8472, 1392.6383, 1396.4282, 1400.217, 1404.0046, 1407.791, 1411.5763, 1415.3604, 1419.1434, 1422.9253, 
+                              1426.7059, 1430.4854, 1434.2638, 1438.041, 1441.8171, 1445.592, 1449.3657, 1453.1383, 1456.9097, 1460.68, 
+                              1464.4491, 1468.2171, 1471.9839, 1475.7496, 1479.5141, 1483.2774, 1487.0396, 1490.8006, 1494.5605, 1498.3193, 
+                              1502.0768, 1505.8332, 1509.5885, 1513.3426, 1517.0956, 1520.8474, 1524.598, 1528.3475, 1532.0958, 1535.843, 
+                              1539.589, 1543.3339, 1547.0776, 1550.8202, 1554.5616, 1558.3018, 1562.0409, 1565.7788, 1569.5156, 1573.2513, 
+                              1576.9857, 1580.719, 1584.4512, 1588.1822, 1591.9121, 1595.6408, 1599.3683, 1603.0947, 1606.8199, 1610.544, 
+                              1614.2669, 1617.9887, 1621.7093, 1625.4288, 1629.1471, 1632.8642, 1636.5802, 1640.295, 1644.0087, 1647.7212, 
+                              1651.4326, 1655.1428, 1658.8519, 1662.5598, 1666.2666, 1669.9722, 1673.6766, 1677.3799, 1681.082, 1684.783, 
+                              1688.4828, 1692.1815, 1695.879, 1699.5754, 1703.2706, 1706.9646, 1710.6575, 1714.3492, 1718.0398, 1721.7293, 
+                              1725.4175, 1729.1046, 1732.7906, 1736.4754, 1740.1591, 1743.8416, 1747.5229, 1751.2031, 1754.8821, 1758.56, 
+                              1762.2367, 1765.9123, 1769.5867, 1773.26, 1776.9321, 1780.603, 1784.2728, 1787.9414, 1791.6089, 1795.2752, 
+                              1798.9404, 1802.6044, 1806.2673, 1809.929, 1813.5896, 1817.249, 1820.9072, 1824.5643, 1828.2202, 1831.875, 
+                              1835.5286, 1839.1811, 1842.8324, 1846.4826, 1850.1316, 1853.7794, 1857.4261, 1861.0716, 1864.716, 1868.3592, 
+                              1872.0013, 1875.6422, 1879.282, 1882.9206, 1886.5581, 1890.1944, 1893.8295, 1897.4635, 1901.0963, 1904.728, 
+                              1908.3585, 1911.9879, 1915.6161, 1919.2432, 1922.8691, 1926.4938, 1930.1174, 1933.7398, 1937.3611, 1940.9813, 
+                              1944.6002, 1948.218, 1951.8347, 1955.4502, 1959.0646, 1962.6778, 1966.2898, 1969.9007, 1973.5104, 1977.119, 
+                              1980.7264, 1984.3327, 1987.9378, 1991.5418, 1995.1446, 1998.7462, 2002.3467, 2005.946, 2009.5442, 2013.1412, 
+                              2016.7371, 2020.3318, 2023.9254, 2027.5178, 2031.1091, 2034.6992, 2038.2881, 2041.8759, 2045.4625, 2049.048, 
+                              2052.6323, 2056.2155, 2059.7975, 2063.3784, 2066.9581, 2070.5366, 2074.114, 2077.6902, 2081.2653, 2084.8392, 
+                              2088.412, 2091.9836, 2095.5541, 2099.1234, 2102.6916, 2106.2586, 2109.8244, 2113.3891, 2116.9526, 2120.515 };
 
 
 //Parameters to refresh display
@@ -220,6 +250,7 @@ static boolean flag_serialout_refresh = true;  //display refresh flag
 
 //Function prototypes
 void do_readTemp();      //Function to handle temperature readings
+float read_PT1000(float Rout_probe, float* PT1000_Resistances); // Function to calculate temperature of PT1000 based on the resistance
 void do_display();       // Function to handle display
 void do_heater();        // Function to handle heater
 void do_statemachine();  // Handles all states; sets variables to right value depending on state
@@ -482,7 +513,6 @@ void do_readTemp()
 
 Vout_base=((Vout_base*999.0)+float(analogReadMilliVolts(BASE_SENSOR_PIN))/1000.0)/1000.0;
 Rout_base=R_ref_base*(Vref/Vout_base - 1.0);
-//Serial.println(Rout_base);
 TempK_base=1.0/(((log(Rout_base/R_0_base))/beta_base)+(1/(T_0_base)));
 
 if((TempK_base<=100 || TempK_base>533.15)&&(sensorMode==BOTTOM_SENSOR_ONLY || sensorMode==DUAL_MODE)){
@@ -493,16 +523,15 @@ if((TempK_base<=100 || TempK_base>533.15)&&(sensorMode==BOTTOM_SENSOR_ONLY || se
 if(tempUnit==UNIT_C)T_base=Calibration_T_base + TempK_base-273.15;
 if(tempUnit==UNIT_F)T_base=Calibration_T_base + ((TempK_base-273.15)*5.0/9.0)-32.0;
 
-//Serial.println(Rout_base);
 
 // Read temperature of probe
 //We smooth the reading by averaging it over 10000 values (more sampling needed because probe sensor is noisier due to not having a capacitor in parallel)
 Vout_probe_high=((Vout_probe_high*9999.0)+float(analogReadMilliVolts(PROBE_SENSOR_PIN_HIGH)))/10000.0;
 Vout_probe_low=((Vout_probe_low*9999.0)+ float(analogReadMilliVolts(PROBE_SENSOR_PIN_LOW)))/10000.0;
 Rout_probe=R_ref_probe*(Vout_probe_low-0.0) / (Vout_probe_high-Vout_probe_low);
-TempK_probe=273.15+(Rout_probe-1000.0)*(523.15-273.15)/(1940.981-1000.0); // For now, a linear approximation for PT1000 resistances In future to implement https://www.fluke.com/en-us/learn/tools-calculators/pt100-table-generator
 
-
+/*TempK_probe=273.15+(Rout_probe-1000.0)*(523.15-273.15)/(1940.981-1000.0); // For now, a linear approximation for PT1000 resistances In future to implement https://www.fluke.com/en-us/learn/tools-calculators/pt100-table-generator*/
+TempK_probe = 273.15 + read_PT1000(Rout_probe, PT1000_Resistances); // The function returns temperature in C so need to convert to K
 if((TempK_probe<=100 || TempK_probe>500)&& (sensorMode==PROBE_SENSOR_ONLY || sensorMode==DUAL_MODE)){
   TempK_probe=273.15; //If reading is out of range, return 0 C
   heaterState=HEATER_OFF; //Turn off heater to prevent thermal runout
@@ -511,6 +540,28 @@ if((TempK_probe<=100 || TempK_probe>500)&& (sensorMode==PROBE_SENSOR_ONLY || sen
 if(tempUnit==UNIT_C)T_probe=Calibration_T_probe + TempK_probe-273.15;
 if(tempUnit==UNIT_F)T_probe=Calibration_T_probe+ ((TempK_probe-273.15)*5.0/9.0)-32.0;
 }
+
+
+float read_PT1000(float Rout_probe, float* PT1000_Resistances){  // Function to calculate temperature of PT1000 based on the resistance
+
+//Check for out of bound values
+if ((Rout_probe < PT1000_Resistances[0]) || (Rout_probe > PT1000_Resistances[300]) ){
+  heaterState=HEATER_OFF;
+  return -99.99;
+}
+
+int pos=0; //Start at the start of the temperature range and serch for the resistance value in the PT1000 table
+while (Rout_probe > PT1000_Resistances[pos]) pos++;
+
+if (Rout_probe == PT1000_Resistances[pos]) return pos; // If the resistance matches, exactly, we found our temperature
+//If not, we need to interolate between neiboring temperatures
+float r1=PT1000_Resistances[pos-1];
+float r2=PT1000_Resistances[pos];
+float k1=pos-1;
+float k2=pos;
+return k1 + (Rout_probe-r1)/(r2-r1)*(k2-k1);
+}
+
 
 void do_statemachine()
 {
